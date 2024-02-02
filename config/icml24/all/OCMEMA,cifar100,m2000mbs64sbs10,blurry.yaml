@@ -1,0 +1,16 @@
+
+learner         :       OCMEMA
+training_type   :       blurry
+blurry_scale    :       500
+dataset         :       cifar100
+n_tasks         :       10
+mem_size        :       2000
+mem_batch_size  :       64
+batch_size      :       10
+proj_dim        :       128
+nf              :       64
+supervised      :       True
+kd_lambda       :       8
+n_teacher       :       1
+alpha_min       :       0.01
+alpha_max       :       0.01

@@ -1,0 +1,16 @@
+
+learner         :       DVC_SDP
+optim           :       SGD
+learning_rate   :       0.1
+momentum        :       0.9
+weight_decay    :       0
+dataset         :       imagenet100
+n_tasks         :       20
+mem_size        :       5000
+mem_batch_size  :       64
+batch_size      :       10
+nf              :       64
+tf_type         :       full
+training_type   :       inc
+sdp_c2          :       0.75
+sdp_mu          :       100

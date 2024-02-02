@@ -1,0 +1,16 @@
+
+learner         :       ER_SDP
+optim           :       Adam
+learning_rate   :       0.0005
+momentum        :       0
+weight_decay    :       0
+dataset         :       tiny
+n_tasks         :       100
+mem_size        :       10000
+mem_batch_size  :       64
+batch_size      :       10
+nf              :       64
+tf_type         :       full
+training_type   :       inc
+sdp_c2          :       0.75
+sdp_mu          :       100

@@ -1,0 +1,14 @@
+
+learner         :       PCR
+optim           :       Adam
+learning_rate   :       0.0005
+momentum        :       0
+weight_decay    :       0
+dataset         :       cifar10
+n_tasks         :       5
+mem_size        :       200
+mem_batch_size  :       64
+batch_size      :       10
+nf              :       64
+tf_type         :       full
+training_type   :       inc

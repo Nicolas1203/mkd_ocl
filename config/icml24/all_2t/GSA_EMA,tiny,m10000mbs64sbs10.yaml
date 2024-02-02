@@ -1,0 +1,18 @@
+
+learner         :       GSA_EMA
+optim           :       Adam
+learning_rate   :       0.0005
+momentum        :       0
+weight_decay    :       0
+dataset         :       tiny
+n_tasks         :       100
+mem_size        :       10000
+mem_batch_size  :       64
+batch_size      :       10
+nf              :       64
+tf_type         :       partial
+training_type   :       inc
+kd_lambda       :       8
+n_teacher       :       2
+alpha_min       :       0.005
+alpha_max       :       0.1

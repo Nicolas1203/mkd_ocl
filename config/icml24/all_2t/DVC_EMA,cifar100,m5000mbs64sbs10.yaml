@@ -1,0 +1,18 @@
+
+learner         :       DVC_EMA
+optim           :       SGD
+learning_rate   :       0.1
+momentum        :       0.9
+weight_decay    :       0
+dataset         :       cifar100
+n_tasks         :       10
+mem_size        :       5000
+mem_batch_size  :       64
+batch_size      :       10
+nf              :       64
+training_type   :       inc
+kd_lambda       :       8
+n_teacher       :       2
+alpha_min       :       0.005
+alpha_max       :       0.1
+# dl_weight is setup in DVC class directly with values from paper

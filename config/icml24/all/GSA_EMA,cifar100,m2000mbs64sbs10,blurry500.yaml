@@ -1,0 +1,19 @@
+
+learner         :       GSA_EMA
+optim           :       Adam
+learning_rate   :       0.0005
+momentum        :       0
+weight_decay    :       0
+dataset         :       cifar100
+n_tasks         :       10
+mem_size        :       2000
+mem_batch_size  :       64
+batch_size      :       10
+nf              :       64
+tf_type         :       partial
+training_type   :       blurry
+blurry_scale    :       500
+kd_lambda       :       5.5
+n_teacher       :       1
+alpha_min       :       0.01
+alpha_max       :       0.01
