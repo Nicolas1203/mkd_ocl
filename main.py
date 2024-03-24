@@ -41,7 +41,7 @@ def main():
                 setattr(args, key, wandb.config[key])
 
         # Seed initilization
-        args.seed = run_id
+        if args.n_runs > 1: args.seed = run_id
         np.random.seed(args.seed)
         r.seed(args.seed)
         torch.manual_seed(args.seed)

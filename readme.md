@@ -5,12 +5,10 @@ Continual Learning repository
 
 ```bash
 .
-├── LICENSE
 ├── README.md
 ├── config
 │   ├── all                 # All config files used to train the methods are here
 │   └── parser.py           # Argument parser
-├── illustration.png
 ├── main.py                 # Entrypoint of the project
 ├── requirements.txt        
 ├── results                 # results will be stored here as .csv

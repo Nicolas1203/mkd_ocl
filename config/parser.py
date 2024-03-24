@@ -69,7 +69,7 @@ class Parser:
         #####################
         # Dataset parameters
         #####################
-        parser.add_argument('--data-root-dir', default='/data/',
+        parser.add_argument('--data-root-dir', default='./data/',
                             help='Root dir containing the dataset to train on.')
         parser.add_argument('--min-crop', type=float, default=0.2, help="Minimum size for cropping in data augmentation. range (0-1)")
         parser.add_argument('--dataset', '-d', default="cifar10",
