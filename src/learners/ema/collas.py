@@ -39,14 +39,12 @@ class COLLASLearner(ERLearner):
         super().__init__(args)
         self.classes_seen_so_far = torch.LongTensor(size=(0,)).to(device)
         
-        self.ema_models = {}
-        self.ema_alphas = {}
-        # Manually set 1 EMA ensemble
-        self.ema_models[0] = deepcopy(self.model)
-        self.ema_alphas[0] = self.params.alpha_min
+        # Manually set EMA ensemble
+        self.ema_model = deepcopy(self.model)
+        self.ema_alpha = self.params.alpha_min
         self.n_updates = 0
         
-        print(self.ema_alphas)
+        print(self.ema_alpha)
         self.update_ema(init=True)
         self.params.eval_teacher = True # CoLLAS evaluates with the EMA model
         
@@ -75,6 +73,9 @@ class COLLASLearner(ERLearner):
                         combined_aug = self.transform_train(combined_x)
                         
                         # logits
+                        # Do a forward pass to update Batch Norm parameters of ema model
+                        _ = self.ema_model.logits(combined_aug) 
+                        
                         logits_stu = self.model.logits(combined_aug)
                         loss_ce = self.criterion(logits_stu, combined_y.long())
                         loss = loss_ce
@@ -121,17 +122,15 @@ class COLLASLearner(ERLearner):
         Update the Exponential Moving Average (EMA) of the group of pytorch models
         """
         self.n_updates += 1
-        for i, ema_model in enumerate(self.ema_models.values()):
-            alpha = self.ema_alphas[i]
-            norm_w = np.array(self.calculate_ema_weights(self.n_updates, alpha)).sum()
-            for param, ema_param in zip(self.model.parameters(), ema_model.parameters()):
-                p = deepcopy(param.data.detach())
-                
-                if init:
-                    ema_param.data.mul_(0).add_(p * alpha)
-                else:
-                    # ema_param.data.mul_(1 - alpha).add_(p * alpha).mul(1/norm_w)
-                    ema_param.data.mul_(1 - alpha).add_(p * alpha)
+        alpha = self.ema_alpha
+        norm_w = np.array(self.calculate_ema_weights(self.n_updates, alpha)).sum()
+        for param, ema_param in zip(self.model.parameters(), self.ema_model.parameters()):
+            p = deepcopy(param.data.detach())
+            if init:
+                ema_param.data.mul_(0).add_(p * alpha).mul(1/norm_w)
+            else:
+                ema_param.data.mul_(1 - alpha).add_(p * alpha).mul(1/norm_w)
+                # ema_param.data.mul_(1 - alpha).add_(p * alpha)
 
     def encode(self, dataloader, model_tag=0, nbatches=-1, **kwargs):
         self.init_agg_model()
@@ -180,20 +179,10 @@ class COLLASLearner(ERLearner):
             return all_feat, all_labels
     
     def init_agg_model(self):
-        if self.params.eval_teacher:
-            self.model_agg = deepcopy(list(self.ema_models.values())[0])
-        else:
-            self.model_agg = deepcopy(self.model)
-        if not self.params.no_avg:
-            with torch.autocast(device_type='cuda', dtype=torch.float16):
-                # infer with model_agg as average of all the ema models
-                with torch.no_grad():
-                    for teacher in self.ema_models.values():
-                        for param_agg, teacher_param in zip(self.model_agg.parameters(), teacher.parameters()):
-                            param_agg.add_(teacher_param.detach())
-                    for param_agg in self.model_agg.parameters():
-                        param_agg.mul_(1/(len(self.ema_models) + 1))
-        self.model_agg.eval()
+        with torch.autocast(device_type='cuda', dtype=torch.float16):
+            with torch.no_grad():
+                self.model_agg = deepcopy(self.ema_model)
+                self.model_agg.eval()
     
     def get_mem_rep_labels(self, eval=True, use_proj=False):
         """Compute every representation -labels pairs from memory

@@ -216,15 +216,15 @@ class ER_EMALearner(ERLearner):
             self.model_agg = deepcopy(list(self.ema_models.values())[0])
         else:
             self.model_agg = deepcopy(self.model)
-        if not self.params.no_avg:
-            with torch.autocast(device_type='cuda', dtype=torch.float16):
-                # infer with model_agg as average of all the ema models
-                with torch.no_grad():
-                    for teacher in self.ema_models.values():
-                        for param_agg, teacher_param in zip(self.model_agg.parameters(), teacher.parameters()):
-                            param_agg.add_(teacher_param.detach())
-                    for param_agg in self.model_agg.parameters():
-                        param_agg.mul_(1/(len(self.ema_models) + 1))
+            if not self.params.no_avg:
+                with torch.autocast(device_type='cuda', dtype=torch.float16):
+                    # infer with model_agg as average of all the ema models
+                    with torch.no_grad():
+                        for teacher in self.ema_models.values():
+                            for param_agg, teacher_param in zip(self.model_agg.parameters(), teacher.parameters()):
+                                param_agg.add_(teacher_param.detach())
+                        for param_agg in self.model_agg.parameters():
+                            param_agg.mul_(1/(len(self.ema_models) + 1))
         self.model_agg.eval()
     
     def get_mem_rep_labels(self, eval=True, use_proj=False):
