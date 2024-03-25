@@ -112,7 +112,8 @@ class ER_KDULearner(BaseLearner):
                 print(
                     f"Task : {task_name}   batch {j}/{len(dataloader)}   Loss : {loss.item():.4f}    time : {time.time() - self.start:.4f}s"
                 )
-        self.previous_model = deepcopy(self.model)
+        if self.params.kdu:
+            self.previous_model = deepcopy(self.model)
 
     def tsne(self, **kwargs):
         no_drift = kwargs.get('no_drift', False)

@@ -110,6 +110,7 @@ class Parser:
         parser.add_argument('--labels-ratio', type=float, default=0.03, help="Ratio of labeled data for SSL")
         # Distillation parameters
         parser.add_argument('--ocm-custom', action="store_true")
+        parser.add_argument('--kdu', action='store_true')
         # Learner parameter
         parser.add_argument('--learner', help='What learner do you want ? See list of available learners in utils/name_match.py')
         parser.add_argument('--debug', action='store_true')
