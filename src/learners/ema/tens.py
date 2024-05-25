@@ -34,7 +34,7 @@ scaler = amp.GradScaler()
 LR_MIN = 5e-4
 LR_MAX = 5e-2
 
-class TEns(ERLearner):
+class TEnsLearner(ERLearner):
     def __init__(self, args):
         super().__init__(args)
         self.classes_seen_so_far = torch.LongTensor(size=(0,)).to(device)
