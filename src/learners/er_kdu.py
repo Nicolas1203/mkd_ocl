@@ -71,19 +71,24 @@ class ER_KDULearner(BaseLearner):
         task_name  = kwargs.get('task_name', 'unknown task')
         task_id = kwargs.get("task_id", None)
         self.model = self.model.train()
+        if task_id == 0:
+            init_epochs = 5
+        else:
+            init_epochs = 1
+        for r in range(init_epochs):
+            for j, batch in enumerate(dataloader):
+                # Stream data
+                batch_x, batch_y = batch[0], batch[1]
+                self.stream_idx += len(batch_x)
+                
+                for _ in range(self.params.mem_iters):
+                    mem_x, mem_y = self.buffer.random_retrieve(n_imgs=self.params.mem_batch_size)
 
-        for j, batch in enumerate(dataloader):
-            # Stream data
-            batch_x, batch_y = batch[0], batch[1]
-            self.stream_idx += len(batch_x)
-            
-            for _ in range(self.params.mem_iters):
-                mem_x, mem_y = self.buffer.random_retrieve(n_imgs=self.params.mem_batch_size)
-
-                if mem_x.size(0) > 0:
-                    # Combined batch
-                    combined_x, combined_y = self.combine(batch_x, batch_y, mem_x, mem_y)  # (batch_size, nb_channel, img_size, img_size)
-
+                    if (mem_x.size(0) > 0 and r==0) or task_id>0:
+                        # Combined batch
+                        combined_x, combined_y = self.combine(batch_x, batch_y, mem_x, mem_y)  # (batch_size, nb_channel, img_size, img_size)
+                    else:
+                        combined_x, combined_y = batch_x.to(device), batch_y.to(device)
                     # Augment
                     combined_x = self.transform_train(combined_x)
 
@@ -102,18 +107,23 @@ class ER_KDULearner(BaseLearner):
                     self.optim.zero_grad()
                     loss.backward()
                     self.optim.step()
-                    
-            # Update reservoir buffer
-            self.buffer.update(imgs=batch_x, labels=batch_y, model=self.model)
+                        
+                # Update reservoir buffer
+                if r == 0:
+                    self.buffer.update(imgs=batch_x, labels=batch_y, model=self.model)
 
-            if (j == (len(dataloader) - 1)) and (j > 0):
-                if self.params.tsne and task_id == self.params.n_tasks - 1:
-                    self.tsne()
-                print(
-                    f"Task : {task_name}   batch {j}/{len(dataloader)}   Loss : {loss.item():.4f}    time : {time.time() - self.start:.4f}s"
-                )
+                if (j == (len(dataloader) - 1)) and (j > 0):
+                    if self.params.tsne and task_id == self.params.n_tasks - 1:
+                        self.tsne()
+                    print(
+                        f"Task : {task_name}   batch {j}/{len(dataloader)}   Loss : {loss.item():.4f}    time : {time.time() - self.start:.4f}s"
+                    )
+            if r == 0 and task_id == 0:
+                self.model_backup = deepcopy(self.model)
         if self.params.kdu:
             self.previous_model = deepcopy(self.model)
+            self.model = self.model_backup
+            self.optim = self.load_optim()
 
     def tsne(self, **kwargs):
         no_drift = kwargs.get('no_drift', False)

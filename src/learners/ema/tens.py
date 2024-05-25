@@ -34,7 +34,7 @@ scaler = amp.GradScaler()
 LR_MIN = 5e-4
 LR_MAX = 5e-2
 
-class COLLASLearner(ERLearner):
+class TEns(ERLearner):
     def __init__(self, args):
         super().__init__(args)
         self.classes_seen_so_far = torch.LongTensor(size=(0,)).to(device)
@@ -46,7 +46,7 @@ class COLLASLearner(ERLearner):
         
         print(self.ema_alpha)
         self.update_ema(init=True)
-        self.params.eval_teacher = True # CoLLAS evaluates with the EMA model
+        self.params.eval_teacher = True # Temporal Ensemble evaluates with the EMA model
         
     # @profile
     def train(self, dataloader, **kwargs):

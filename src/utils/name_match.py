@@ -20,7 +20,7 @@ from src.learners.sdp.derpp_sdp import DERpp_SDPLearner
 from src.learners.baselines.pcr import PCRLearner
 from src.learners.ema.pcr_ema import PCR_EMALearner
 from src.learners.er_kdu import ER_KDULearner
-from src.learners.ema.collas import COLLASLearner
+from learners.ema.tens import TEnsLearner
 
 from src.buffers.reservoir import Reservoir
 from src.buffers.protobuf import ProtoBuf
@@ -57,7 +57,7 @@ learners = {
     "PCR": PCRLearner,
     "PCR_EMA": PCR_EMALearner,
     "ER_KDU": ER_KDULearner,
-    "COLLAS": COLLASLearner
+    "TEns": TEnsLearner
 }
 
 buffers = {
