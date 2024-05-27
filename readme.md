@@ -1,47 +1,71 @@
-Continual Learning repository 
+Implementation of our paper titled "Rethinking Momentum Knowledge Distillation in Online Continual Learning"
 ==========================================
+The paper has been accepted at ICML 2024.
 
 # Project structure
 
 ```bash
 .
-├── README.md
 ├── config
-│   ├── all                 # All config files used to train the methods are here
-│   └── parser.py           # Argument parser
-├── main.py                 # Entrypoint of the project
-├── requirements.txt        
-├── results                 # results will be stored here as .csv
-├── src                     # all the useful code is here
-│   ├── buffers             
-│   │   ├── buffer.py
-│   │   ├── logits_res.py
-│   │   └── reservoir.py
-│   ├── datasets
-│   ├── learners            # All methods are implemented here and inherit from base.py
-│   │   ├── base.py
-│   │   ├── baselines
+│   ├── icml24
+│   │   └── all              # configs files
+│   ├── parser.py            # define all command line arguments
+├── logs                     # some logs
+├── main.py
+├── readme.md                # this file
+├── requirements.txt
+├── results                  # accuracy and params used is saved here
+├── src
+│   ├── buffers             # A lot of buffers. Only reservoir is used.
+│   ├── datasets            # dataset definitions
+│   ├── learners
+│   │   ├── baselines       # original methods
 │   │   │   ├── agem.py
 │   │   │   ├── derpp.py
 │   │   │   ├── dvc.py
-│   │   │   ├── er.py
 │   │   │   ├── er_ace.py
-│   │   │   ├── gdumb.py
-│   │   │   ├── lump.py
+│   │   │   ├── er.py
+│   │   │   ├── gsa.py
 │   │   │   ├── ocm.py
-│   │   │   └── scr.py
+│   │   │   ├── pcr.py
+│   │   ├── base.py
 │   │   ├── ce.py
-│   │   └── fd.py
-│   ├── models
-│   │   └── resnet.py
+│   │   ├── ema             # variations with MKD - EMA
+│   │   │   ├── base_ema.py
+│   │   │   ├── derpp_ema.py
+│   │   │   ├── dvc_ema.py
+│   │   │   ├── er_ace_ema.py
+│   │   │   ├── er_ema.py
+│   │   │   ├── gsa_ema.py
+│   │   │   ├── ocm_ema.py
+│   │   │   ├── pcr_ema.py
+│   │   │   └── tens.py
+│   │   ├── er_kdu.py
+│   │   └── sdp
+│   │       ├── derpp_sdp.py
+│   │       ├── dvc_sdp.py
+│   │       ├── er_ace_sdp.py
+│   │       ├── er_sdp.py
+│   │       ├── gsa_sdp.py
+│   │       ├── ocm_ema.py
+│   ├── models          # networks definitions
+│   │   ├── cnn.py
+│   │   ├── mlp.py
+│   │   ├── pcr_resnet.py
+│   │   ├── resnet.py
+│   │   └── resnet_sdp.py
 │   └── utils
+│       ├── alias_multinomial.py
+│       ├── augment.py
 │       ├── data.py
-│       ├── losses.py       # Losses are implemented here
+│       ├── early_stopping.py      # deprecated
+│       ├── losses.py
 │       ├── metrics.py
-│       ├── name_match.py   # Correspondance between learner, buffer and naming conventions
-│       ├── tensorboard.py
+│       ├── name_match.py         # here you can see all methods and buffer
+│       ├── tensorboard.py      # deprecated
 │       └── utils.py
-└── sweeps                  # Sweep configurations for HP search
+├── sweeps              # sweeps logs when using sweep (with wandb)
+└── wandb               # wanbd logs when using wandb
 ```
 
 # Installation
@@ -53,38 +77,33 @@ It is recommended to use a virtualenv or docker to run this code. Corresponding 
 Command line usage of the current repository is described here.
 
 ```bash
-usage: main.py [-h] [--config CONFIG] [--train] [--test] [--epochs N]
-               [--start-epoch N] [-b BATCH_SIZE] [--learning-rate LEARNING_RATE]
+usage: main.py [-h] [--config CONFIG] [--train] [--test]
+               [-b BATCH_SIZE] [--learning-rate LEARNING_RATE]
                [--momentum M] [--weight-decay W] [--optim {Adam,SGD}] [--save-ckpt]
-               [--seed SEED] [--tag TAG] [--tb-root TB_ROOT] [--logs-root LOGS_ROOT]
+               [--seed SEED] [--tag TAG]
                [--results-root RESULTS_ROOT] [--tensorboard] [--verbose]
                [--ckpt-root CKPT_ROOT] [--resume] [--model-state MODEL_STATE]
                [--buffer-state BUFFER_STATE] [--head HEAD] [--proj-dim PROJ_DIM]
                [--nb-channels NB_CHANNELS] [--eval-proj] [--pretrained]
                [--supervised] [--dim-int DIM_INT] [-nf NF]
                [--data-root-dir DATA_ROOT_DIR] [--min-crop MIN_CROP]
-               [--dataset {mnist,fmnist,cifar10,cifar100,tiny,sub,yt}]
+               [--dataset {cifar10,cifar100,tiny,imagenet100}]
                [--training-type {uni,inc,blurry}] [--n-classes N_CLASSES]
                [--img-size IMG_SIZE] [--num-workers NUM_WORKERS] [--n-tasks N_TASKS]
                [--labels-order LABELS_ORDER [LABELS_ORDER ...]]
                [--blurry-scale BLURRY_SCALE] [--temperature T] [--mem-size MEM_SIZE]
                [--mem-batch-size MEM_BATCH_SIZE] [--buffer BUFFER]
                [--drop-method {random}] [--mem-iters MEM_ITERS] [--learner LEARNER]
-               [--debug] [--eval-mem] [--eval-random] [--lab-pc LAB_PC]
-               [--n-runs N_RUNS] [--start-seed START_SEED] [--run-id RUN_ID]
-               [--kornia] [--no-kornia] [--n-augs N_AUGS] [--tf-type {full,partial}]
-               [--var VAR] [--fd-loss FD_LOSS] [-mu MU] [--derpp-alpha DERPP_ALPHA]
+               [--eval-mem] [--eval-random]
+               [--kornia] [--no-kornia] [--tf-type {full,partial}]
+               [--derpp-alpha DERPP_ALPHA]
                [--derpp-beta DERPP_BETA] [--no-wandb] [--wandb-watch] [--sweep]
 
-Pytorch UCL, with tensorboard logs.
+Pytorch implementation of various continual learners.
 
 options:
   -h, --help            show this help message and exit
   --config CONFIG       Path to the configuration file for the training to launch.
-  --train
-  --test
-  --epochs N            number of total epochs to run
-  --start-epoch N       manual epoch number (useful on restarts)
   -b BATCH_SIZE, --batch-size BATCH_SIZE
                         mini-batch size (default: 10)
   --learning-rate LEARNING_RATE, -lr LEARNING_RATE
@@ -96,13 +115,8 @@ options:
   --save-ckpt           whether to save chekpoints or not
   --seed SEED           Random seed to use.
   --tag TAG, -t TAG     Base name for graphs and checkpoints
-  --tb-root TB_ROOT     Where do you want tensorboards graphs ?
-  --logs-root LOGS_ROOT
-                        Defalt root folder for writing logs.
   --results-root RESULTS_ROOT
                         Where you want to save the results ?
-  --tensorboard
-  --verbose
   --ckpt-root CKPT_ROOT
                         Directory where to save the model.
   --resume, -r          Resume old training. Setup model state and buffer state.
@@ -142,30 +156,18 @@ options:
                         How many images do you want to retrieve from the memory/ltm
   --buffer BUFFER       What buffer do you want ? See available buffers in
                         utils/name_match.py
-  --drop-method {random}
-                        How to drop images from memory when adding new ones.
   --mem-iters MEM_ITERS
                         Number of iterations on memory
   --learner LEARNER     What learner do you want ? See list of available learners in
                         utils/name_match.py
-  --debug
   --eval-mem
   --eval-random
-  --lab-pc LAB_PC       Number of labeled images per class to use in unsupervised
-                        evaluation.
   --n-runs N_RUNS       Number of runs, with different seeds each time.
-  --start-seed START_SEED
-                        First seed to use.
-  --run-id RUN_ID       Id of the current run in multi run.
   --kornia
   --no-kornia
   --n-augs N_AUGS
   --tf-type {full,partial}
                         Data augmentation sequence to use.
-  --var VAR             Variance for fd loss. kappa=1/var for VMF and kappa=1/2*var
-                        for AGD.
-  --fd-loss FD_LOSS     vmf or agd loss
-  -mu MU                mu value for FD model.
   --derpp-alpha DERPP_ALPHA
                         Values of alpha un der++ loss
   --derpp-beta DERPP_BETA
@@ -182,18 +184,23 @@ options:
 
 Training can be done by specifying parameters in command line, for example:
 
-    python main.py --results-root ./results/tiny/ --data-root /data/dataset/torchvision --learner FD --dataset tiny --batch-size 10 --fd-loss agd --optim Adam --learning-rate 0.0005
+```bash
+python main.py --results-root ./results/tiny/ --data-root /data/dataset/torchvision --learner FD --dataset tiny --batch-size 10 --fd-loss agd --optim Adam --learning-rate 0.0005
+```
 
 ## Using a configuration file (recommended)
 
 When using a configuration file, parameters specified in the .yaml cannot be overriten by command line arguments. However, other parameters like `--data-root` can be adapted to the users' need.
 
-    python main.py --data-root /Volumes/SSD2/data/dataset/torchvision --config config/icml24/ER,cifar10,m1000mbs64sbs10,blurry1500.yaml
+```bash
+python main.py --data-root /Volumes/SSD2/data/dataset/torchvision --config config/icml24/ER,cifar10,m1000mbs64sbs10,blurry1500.yaml
+```
 
 ## output example
 
 Output of the command above should contain performances like this.
 
+```bash
     root - INFO - --------------------FORGETTING--------------------
     root - INFO - ncm     0.0000   nan      nan      nan      nan      0.0000
     root - INFO - ncm     0.2885   0.0000   nan      nan      nan      0.2885
@@ -206,3 +213,4 @@ Output of the command above should contain performances like this.
     root - INFO - ncm     0.4815   0.3035   0.5150   nan      nan      0.4333
     root - INFO - ncm     0.3135   0.2070   0.4780   0.2875   nan      0.3215
     root - INFO - ncm     0.1935   0.3105   0.3355   0.2625   0.3045   0.2813
+```
