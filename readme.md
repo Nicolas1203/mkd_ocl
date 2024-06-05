@@ -2,6 +2,8 @@ Implementation of our paper titled "Rethinking Momentum Knowledge Distillation i
 ==========================================
 The paper has been accepted at ICML 2024.
 
+![Illustration of our approach](illustration.png)
+
 # Project structure
 
 ```bash
@@ -214,3 +216,7 @@ Output of the command above should contain performances like this.
     root - INFO - ncm     0.3135   0.2070   0.4780   0.2875   nan      0.3215
     root - INFO - ncm     0.1935   0.3105   0.3355   0.2625   0.3045   0.2813
 ```
+
+# Cite
+
+To be updated after the proceedings are released.
