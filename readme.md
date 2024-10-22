@@ -187,7 +187,7 @@ options:
 Training can be done by specifying parameters in command line, for example:
 
 ```bash
-python main.py --results-root ./results/tiny/ --data-root /data/dataset/torchvision --learner FD --dataset tiny --batch-size 10 --fd-loss agd --optim Adam --learning-rate 0.0005
+python main.py --results-root results/cifar10/ --data-root /data/dataset/torchvision --learner ER_EMA --dataset cifar10 --batch-size 10 --optim Adam --learning-rate 0.0005
 ```
 
 ## Using a configuration file (recommended)
@@ -195,7 +195,7 @@ python main.py --results-root ./results/tiny/ --data-root /data/dataset/torchvis
 When using a configuration file, parameters specified in the .yaml cannot be overriten by command line arguments. However, other parameters like `--data-root` can be adapted to the users' need.
 
 ```bash
-python main.py --data-root /Volumes/SSD2/data/dataset/torchvision --config config/icml24/ER,cifar10,m1000mbs64sbs10,blurry1500.yaml
+python main.py --data-root /data/dataset/torchvision --config config/icml24/all/ER,cifar10,m1000mbs64sbs10,blurry500.yaml
 ```
 
 ## output example
