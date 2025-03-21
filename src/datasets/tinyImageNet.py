@@ -2,7 +2,6 @@
 Simple Tiny ImageNet dataset utility class for pytorch.
 Modified version of https://gist.github.com/z-a-f/b862013c0dc2b540cf96a123a6766e54
 """
-from cgi import test
 import os
 
 import numpy as np
